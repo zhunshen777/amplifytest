@@ -1,47 +1,51 @@
-// import React from "react";
-// import './App.css';
-class App extends React.Component {
-
-    // Constructor
+class MyComponent extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            items: [],
-            DataisLoaded: false
+            error: null,
+            isLoaded: false,
+            items: []
         };
     }
 
-    // ComponentDidMount is used to
-    // execute the code
     componentDidMount() {
-        fetch(
-            "https://pfocwsz64zg2zkqxufx26kj4oi0jxmwt.lambda-url.us-east-1.on.aws/")
-            .then((res) => res.json())
-            .then((json) => {
-                this.setState({
-                    items: json,
-                    DataisLoaded: true
-                });
-            })
+        fetch("https://api.example.com/items")
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        isLoaded: true,
+                        items: result.items
+                    });
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    this.setState({
+                        isLoaded: true,
+                        error
+                    });
+                }
+            )
     }
-    render() {
-        const { DataisLoaded, items } = this.state;
-        if (!DataisLoaded) return <div>
-            <h1> Pleses wait some time.... </h1> </div> ;
 
-        return (
-            <div className = "App">
-                <h1> Fetch data from an api in react </h1>  {
-                items.map((item) => (
-                    <ol>
-                        <li>number = {item}</li>
-                    </ol>
-                ))
-            }
-            </div>
-        );
+    render() {
+        const { error, isLoaded, items } = this.state;
+        if (error) {
+            return <div>Error: {error.message}</div>;
+        } else if (!isLoaded) {
+            return <div>Loading...</div>;
+        } else {
+            return (
+                <ul>
+                    {items.map(item => (
+                        <li key={item.id}>
+                            {item.name} {item.price}
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
     }
 }
-
-export default App;
